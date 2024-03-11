@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Runtime;
-using PKHeX.Core.Enhancements;
 namespace PKHeX.Core.AutoMod
 {
     /// <summary>
@@ -446,7 +445,7 @@ namespace PKHeX.Core.AutoMod
 
                 try
                 {
-                    var goodset = new SmogonSetList(rough);
+                    var goodset = new SmogonSetGenerator(rough);
                     if (goodset.Valid && goodset.Sets.Count != 0)
                     {
                         var checknull = sav.GetLegalFromSet(goodset.Sets[rng.Next(goodset.Sets.Count)]);

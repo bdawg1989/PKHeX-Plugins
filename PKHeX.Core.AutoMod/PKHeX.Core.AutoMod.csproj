@@ -4,6 +4,5 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="PKHeX.Core" Version="24.3.10" />
-	<ProjectReference Include="..\PKHeX.Core.Enhancements\PKHeX.Core.Enhancements.csproj" />
   </ItemGroup>
 </Project>
