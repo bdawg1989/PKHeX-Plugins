@@ -453,5 +453,4 @@ namespace PKHeX.Core.AutoMod
                 "Complete"
            };
     }
-
 }

@@ -1152,7 +1152,7 @@ namespace PKHeX.Core.AutoMod
             return orig_ball;
         }
 
-        public static bool GetRandomValidMark(this PK8 pk, IBattleTemplate set, IEncounterable enc, out RibbonIndex mark)
+        public static bool GetRandomValidMark(this PKM pk, IBattleTemplate set, IEncounterable enc, out RibbonIndex mark)
         {
             mark = 0; // throwaway value
             var markinstruction = set is RegenTemplate rt && rt.Regen.HasBatchSettings && rt.Regen.Batch.Instructions.Any(z => z.PropertyName.StartsWith("RibbonMark"));

@@ -166,6 +166,26 @@ namespace AutoModPlugins
                 var versions = RamOffsets.GetValidVersions(SAV.SAV).Reverse().ToArray();
                 if (communicator is not ICommunicatorNX nx)
                 {
+                    if (!communicator.Connected)
+                    {
+                        var errorstr = "Unable to Connect. Click the \"Wiki\" button to troubleshoot.";
+
+                        var error = WinFormsUtil.ALMErrorBasic(errorstr);
+                        error.ShowDialog();
+
+                        var res = error.DialogResult;
+                        if (res == DialogResult.Retry)
+                        {
+                            Process.Start(
+                                new ProcessStartInfo
+                                {
+                                    FileName = "https://github.com/architdate/PKHeX-Plugins/wiki/Installing-LiveHeX",
+                                    UseShellExecute = true
+                                });
+                        }
+
+                        return;
+                    }
                     (validation, msg, lv) = Connect_NTR(communicator, versions);
                 }
                 else
@@ -746,7 +766,7 @@ namespace AutoModPlugins
                 };
 
                 // Invoke function
-                cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, new[] { s, e });
+                cc.GetType().GetMethod(v, BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(cc, [s, e]);
 
                 for (var i = 0; i < objects.Count; i++)
                 {

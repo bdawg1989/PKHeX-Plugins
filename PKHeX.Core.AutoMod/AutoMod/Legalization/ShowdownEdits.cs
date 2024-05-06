@@ -69,10 +69,8 @@ namespace PKHeX.Core.AutoMod
         {
             if (pk.Ability != set.Ability)
                 pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.AbilityNumber >> 1);
-
-            if (pk.Ability != set.Ability && pk.Context >= EntityContext.Gen6 && set.Ability != -1)
+            if (pk.Ability != set.Ability && pk.Context >= EntityContext.Gen8 && set.Ability != -1)
                 pk.RefreshAbility(pk is PK5 { HiddenAbility: true } ? 2 : pk.PersonalInfo.GetIndexOfAbility(set.Ability));
-
             if (preference <= 0)
                 return;
 
@@ -82,8 +80,7 @@ namespace PKHeX.Core.AutoMod
             if (set.Ability == -1)
             {
                 pk.RefreshAbility(pref);
-                if (pk is PK5 pk5 && preference == AbilityPermission.OnlyHidden)
-                    pk5.HiddenAbility = true;
+                if (pk is PK5 pk5 && preference == AbilityPermission.OnlyHidden) pk5.HiddenAbility = true;
             }
             // Set preferred ability number if applicable
             if (pref == 2 && pi is IPersonalAbility12H h && h.AbilityH == set.Ability)
@@ -91,7 +88,6 @@ namespace PKHeX.Core.AutoMod
             // 3/4/5 transferred to 6+ will have ability 1 if both abilitynum 1 and 2 are the same. Capsule cant convert 1 -> 2 if the abilities arnt unique
             if (pk.Format >= 6 && pk.Generation is 3 or 4 or 5 && pk.AbilityNumber != 4 && pi is IPersonalAbility12 a && a.Ability1 == a.Ability2)
                 pk.AbilityNumber = 1;
-
             if (pk is G3PKM && pi is IPersonalAbility12 b && b.Ability1 == b.Ability2)
                 pk.AbilityNumber = 1;
         }
@@ -117,7 +113,8 @@ namespace PKHeX.Core.AutoMod
 
             if (formchange && !UnownFormSet)
                 pk.Form = Form;
-
+            if ((enc.Version == GameVersion.BD || enc.Version == GameVersion.SP) && pk.Species == (ushort)Species.Unown)
+                pk.MetLocation = GetBDSPUnownMetLocation(Form);
             if ((evolutionRequired || formchange) && pk is IScaledSizeValue sv)
             {
                 sv.HeightAbsolute = sv.CalcHeightAbsolute;
@@ -138,7 +135,7 @@ namespace PKHeX.Core.AutoMod
             }
 
             pk.SetSuggestedFormArgument(enc.Species);
-            if (evolutionRequired || formchange || pk.Ability != set.Ability)
+            if (evolutionRequired || formchange || (pk.Ability != set.Ability && set.Ability != -1))
             {
                 var abilitypref = (AbilityPermission)pk.PersonalInfo.GetIndexOfAbility(set.Ability);
                 SetAbility(pk, set, abilitypref);
@@ -382,5 +379,22 @@ namespace PKHeX.Core.AutoMod
                 3 => MoveType.Rock,
                 _ => (MoveType)TeraTypeUtil.OverrideNone,
             };
+        public static ushort GetBDSPUnownMetLocation(byte form)
+        {
+            return (form) switch
+            {
+                < 3 or > 5 and < 8 or > 8 and < 13 or > 13 and < 17 or > 17 and < 26 => 227,
+                3 => 240,
+                4 => 239,
+                5 => 229,
+                8 => 237,
+                13 => 238,
+                17 => 231,
+                > 25 => 225
+
+
+
+            };
+        }
     }
 }

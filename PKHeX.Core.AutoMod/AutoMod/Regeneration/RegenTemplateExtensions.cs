@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PKHeX.Core.AutoMod
@@ -68,8 +69,8 @@ namespace PKHeX.Core.AutoMod
 
         public static string GetRegenText(this PKM pk) => pk.Species == 0 ? string.Empty : new RegenTemplate(pk).Text;
 
-        public static IEnumerable<string> GetRegenSets(this IEnumerable<PKM> data) => data.Where(p => p.Species != 0).Select(GetRegenText);
+        public static IEnumerable<string> GetRegenSets(this Span<PKM> data) => data.ToArray().Where(p => p.Species != 0).Select(GetRegenText);
 
-        public static string GetRegenSets(this IEnumerable<PKM> data, string separator) => string.Join(separator, data.GetRegenSets());
+        public static string GetRegenSets(this Span<PKM> data, string separator) => string.Join(separator, data.GetRegenSets());
     }
 }

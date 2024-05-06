@@ -117,7 +117,7 @@ EVs: 252 SpA / 6 SpD / 252 Spe
 Ability: Magic Guard
 Shiny: Yes
 Hasty Nature
-=Generation=2
+~=Generation=2
 - Psychic
 - Shadow Ball
 - Hidden Power [Fire]
@@ -244,7 +244,7 @@ Tauros (M)
 EVs: 252 Atk / 6 SpA / 252 Spe
 Ability: Sheer Force
 Naive Nature
-=Generation=2
+~=Generation=2
 - Body Slam
 - Rock Slide
 - Earthquake

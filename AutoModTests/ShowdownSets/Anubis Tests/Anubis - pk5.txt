@@ -535,7 +535,7 @@ Ability: Huge Power
 Level: 15
 Shiny: Yes
 Adamant Nature
-~=EggEncounter=True
+~=IsEgg=True
 ~=Version=HGSS
 .Version=8
 - Defense Curl

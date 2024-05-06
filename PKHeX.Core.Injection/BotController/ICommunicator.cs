@@ -35,5 +35,5 @@ namespace PKHeX.Core.Injection
         byte[] ReadBytesAbsoluteMulti(Dictionary<ulong, int> offsets);
     }
 
-    public interface IPokeBlocks : ICommunicator { }
+    public interface IPokeBlocks : ICommunicator;
 }

@@ -1521,6 +1521,7 @@ Ability: Defiant
 Level: 8
 Serious Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Peck
 - Sand Attack
@@ -2042,6 +2043,7 @@ Ability: Cloud Nine
 Level: 37
 Adamant Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Stomp
 - Disable
@@ -2188,6 +2190,7 @@ Ability: Regenerator
 Level: 16
 Gentle Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Constrict
 - Bind
@@ -2367,6 +2370,7 @@ Ability: Technician
 Level: 11
 Docile Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Confusion
 - Barrier
@@ -2377,6 +2381,7 @@ Ability: Technician
 Level: 19
 Lax Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Confusion
 - Barrier

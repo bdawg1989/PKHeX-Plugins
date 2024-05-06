@@ -128,7 +128,7 @@ Ability: Lightning Rod
 Gigantamax: Yes
 Shiny: Square
 Jolly Nature
-~=EggEncounter=True
+~=IsEgg=True
 ~=Version=SWSH
 .Version=44
 - Brick Break

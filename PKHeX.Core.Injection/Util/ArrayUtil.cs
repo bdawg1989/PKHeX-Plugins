@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace PKHeX.Core.Injection
@@ -80,5 +81,11 @@ namespace PKHeX.Core.Injection
             Marshal.FreeHGlobal(ptr);
             return arr;
         }
+        public static IEnumerable<T[]> EnumerateSplit<T>(T[] bin, int size, int start = 0)
+        {
+            for (int i = start; i < bin.Length; i += size)
+                yield return bin.AsSpan(i, size).ToArray();
+        }
+
     }
 }

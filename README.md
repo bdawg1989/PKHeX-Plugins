@@ -1,13 +1,10 @@
 # About  
 This project uses `PKHeX.Core` and PKHeX's `IPlugin` interface to add enhancements to the PKHeX program, namely **Auto**mated **Mod**ifications to simplify creation of legal Pokémon.
-
-This project is owned by [@architdate](https://github.com/architdate) (Discord: thecommondude#8240) and [@kwsch](https://github.com/kwsch) (Discord: Kurt#6024).
-
-[Feature Demonstration Video](https://www.youtube.com/watch?v=pKuElH0hWWA) by AAron#2420.  
-This is an older video but features are still largely similar.
+This Fork is owned by [@santacrab2](https://github.com/santacrab2)
+The original project is owned by [@architdate](https://github.com/architdate) (Discord: thecommondude#8240) and [@kwsch](https://github.com/kwsch) (Discord: Kurt#6024).
 
 ## Building  
-This project requires an IDE that supports compiling .NET based code, such as Visual Studio 2022, and the [.NET 7.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0).
+This project requires an IDE that supports compiling .NET based code, such as Visual Studio 2022, and the [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
 
 **Regular Builds**  
 Regular builds will usually succeed unless there are changes that are incompatible with the NuGet [PKHeX.Core](https://www.nuget.org/packages/PKHeX.Core) package dependency specified in the `.csproj` files of the projects. If building fails, use the bleeding edge method instead.
@@ -40,13 +37,15 @@ To use the plugins:
 ## Support Server
 Please refer to the [Wiki](https://github.com/architdate/PKHeX-Plugins/wiki) first for usage information and help first, as most queries are answered there. If you have looked and need additional help, you can join the dedicated Discord server for this mod!
 
-[<img src="https://canary.discordapp.com/api/guilds/401014193211441153/widget.png?style=banner2">](https://discord.gg/tDMvSRv)
+[<img src="https://canary.discordapp.com/api/guilds/401014193211441153/widget.png?style=banner2">](https://www.piplup.net)
 
 ## Contributing
-To contribute to the repository, you can submit a pull request to the repository. Try to follow a format similar to the current codebase. All contributions are greatly appreciated! If you would like to discuss possible contributions without using GitHub, please contact us on the support server above.
+To contribute to the repository, you can submit a pull request to the repository. Try to follow a format similar to the current codebase. All contributions are greatly appreciated! If you would like to discuss possible contributions without using GitHub, please contact us on the support server above. 
+
+Please ensure you run the unit tests prior to submitting a pull request to the repository. 
 
 ## Credits
-**Repository Owners**
+**Original Repository Owners**
 - [architdate (thecommondude)](https://github.com/architdate)
 - [kwsch (Kaphotics)](https://github.com/kwsch)
 

@@ -34,7 +34,7 @@ namespace PKHeX.Core.AutoMod
 
         private readonly string ParentLines;
 
-        private RegenTemplate(IBattleTemplate set, int gen = PKX.Generation, string text = "")
+        private RegenTemplate(ShowdownSet set, int gen = PKX.Generation, string text = "")
         {
             Species = set.Species;
             Context = set.Context;
@@ -56,7 +56,7 @@ namespace PKHeX.Core.AutoMod
             DynamaxLevel = set.DynamaxLevel;
             TeraType = set.TeraType;
 
-            ParentLines = text;
+            ParentLines = set.Text;
             SanitizeMoves(set, Moves);
         }
 

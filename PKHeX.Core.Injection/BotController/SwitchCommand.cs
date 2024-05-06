@@ -19,7 +19,6 @@ public static class SwitchCommand
         return Encoder.GetBytes(command);
     }
 
-    private static string ToHex(byte[] data) => string.Concat(data.Select(z => $"{z:X2}"));
     private static string Encode(IEnumerable<long> jumps) => string.Concat(jumps.Select(z => $" {z}"));
     private static string Encode(IReadOnlyDictionary<ulong, int> offsetSizeDictionary) => string.Concat(offsetSizeDictionary.Select(z => $" 0x{z.Key:X16} {z.Value}"));
 

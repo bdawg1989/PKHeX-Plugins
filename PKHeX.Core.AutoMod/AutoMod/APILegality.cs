@@ -76,7 +76,8 @@ namespace PKHeX.Core.AutoMod
             var gamelist = FilteredGameList(template, destVer, AllowBatchCommands, set, native);
             if (dest.Generation <= 2)
                 template.EXP = 0; // no relearn moves in gen 1/2 so pass level 1 to generator
-
+            if (gamelist.Length == 1 && gamelist[0] == GameVersion.DP)
+                gamelist = [GameVersion.D, GameVersion.P];
             var encounters = GetAllEncounters(pk: template, moves: new ReadOnlyMemory<ushort>(set.Moves), gamelist);
             var criteria = EncounterCriteria.GetCriteria(set, template.PersonalInfo);
             criteria.ForceMinLevelRange = true;
@@ -104,11 +105,10 @@ namespace PKHeX.Core.AutoMod
                 criteria = SetSpecialCriteria(criteria, enc, set);
 
                 // Create the PKM from the template.
-                var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc, set);
+                var tr = SimpleEdits.IsUntradeableEncounter(enc) ? dest : GetTrainer(regen, enc, set, dest);
                 var raw = enc.GetPokemonFromEncounter(tr, criteria, set);
                 if (raw.OriginalTrainerName.Length == 0)
                 {
-                    
                     raw.Language = tr.Language;
                     tr.ApplyTo(raw);
                 }
@@ -333,7 +333,7 @@ namespace PKHeX.Core.AutoMod
         /// </summary>
         /// <param name="regen">Regenset</param>
         /// <returns>ITrainerInfo of the trainerdetails</returns>
-        private static ITrainerInfo GetTrainer(RegenSet regen, IEncounterable enc, IBattleTemplate set)
+        private static ITrainerInfo GetTrainer(RegenSet regen, IEncounterable enc, IBattleTemplate set, ITrainerInfo dest)
         {
             var ver = enc.Version;
             var gen = enc.Generation;
@@ -361,7 +361,7 @@ namespace PKHeX.Core.AutoMod
             if (AllowTrainerOverride && regen.HasTrainerSettings && regen.Trainer != null)
                 return regen.Trainer.MutateLanguage(mutate, ver);
 
-            return UseTrainerData ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver) : TrainerSettings.DefaultFallback(ver, regen.Extra.Language);
+            return UseTrainerData ? TrainerSettings.GetSavedTrainerData(ver, gen).MutateLanguage(mutate, ver) : TrainerSettings.DefaultFallback(ver, regen.Extra.Language??(LanguageID)dest.Language);
         }
 
         /// <summary>
@@ -416,8 +416,8 @@ namespace PKHeX.Core.AutoMod
                 return false;
 
             // Don't process if the gender does not match the set
-            //if (enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
-                //return false;
+            if (set.Gender is not null && enc is IFixedGender { IsFixedGender: true } fg && fg.Gender != set.Gender)
+                return false;
 
             // Don't process if PKM is definitely Hidden Ability and the PKM is from Gen 3 or Gen 4 and Hidden Capsule doesn't exist
             var gen = enc.Generation;
@@ -532,7 +532,10 @@ namespace PKHeX.Core.AutoMod
 
             if (enc is IStaticCorrelation8b s && s.GetRequirement(pk) == StaticCorrelation8bRequirement.MustHave)
                 return true;
-
+            if (enc is EncounterSlot4 && pk.Species == (ushort)Species.Unown)
+                return true;
+            if (enc is EncounterSlot3 && pk.Species == (ushort)Species.Unown)
+                return true;
             return enc is EncounterEgg && GameVersion.BDSP.Contains(enc.Version);
         }
 
@@ -1003,7 +1006,19 @@ namespace PKHeX.Core.AutoMod
                     shiny = set.Shiny ? Shiny.Always : Shiny.Never;
                 }
 
-                FindEggPIDIV8b(pk, shiny, set.Gender is null ? (byte)Gender.Random : (byte)set.Gender,criteria);
+                FindEggPIDIV8b(pk, shiny, set.Gender, criteria);
+            }
+            else if (enc is EncounterSlot4 enc4 && pk.Species == (ushort)Species.Unown)
+            {
+                var pi = PersonalTable.HGSS[pk.Species];
+                if (pk.HGSS)
+                    enc4.SetFromIVsK((PK4)pk, pi, criteria, out var _);
+                else
+                    enc4.SetFromIVsJ((PK4)pk, pi, criteria, out var _);
+            }
+            else if (enc is EncounterSlot3 enc3 && pk.Species == (ushort)Species.Unown)
+            {
+                enc3.SetFromIVsUnown((PK3)pk, criteria);
             }
         }
 
@@ -1229,7 +1244,7 @@ namespace PKHeX.Core.AutoMod
         /// <param name="pk">pokemon to edit</param>
         /// <param name="shiny">Shinytype requested</param>
         /// <param name="gender"></param>
-        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, byte gender, EncounterCriteria criteria)
+        public static void FindEggPIDIV8b(PKM pk, Shiny shiny, byte? gender, EncounterCriteria criteria)
         {
             var ivs = new[] { -1, -1, -1, -1, -1, -1 };
             var IVs = pk.IVs;
@@ -1280,7 +1295,7 @@ namespace PKHeX.Core.AutoMod
                 {
                     var gender_roll = rng.NextUInt(252) + 1;
                     var fin_gender = gender_roll < ratio ? 1 : 0;
-                    if (gender != (byte)Gender.Genderless && gender != fin_gender)
+                    if (gender is not null && gender!=(byte)Gender.Genderless&& gender != fin_gender)
                         continue;
                 }
 
@@ -1297,7 +1312,10 @@ namespace PKHeX.Core.AutoMod
                 {
                     var stat = rng.NextUInt(6);
                     if (ivs[stat] != -1)
+                    {
+                        inherited++;
                         continue;
+                    }
 
                     rng.NextUInt(2); // decides which parents iv to inherit, assume that parent has the required IV
                     ivs[stat] = required_ivs[stat];
@@ -1316,7 +1334,7 @@ namespace PKHeX.Core.AutoMod
                     if (ivs[i] == -1)
                         ivs[i] = (int)ivs2[i];
                 }
-                if (!criteria.IsCompatibleIVs(ivs))
+               if (!criteria.IsIVsCompatibleSpeedLast(ivs,8))
                    continue;
                 pk.IV_HP = ivs[0];
                 pk.IV_ATK = ivs[1];
@@ -1408,17 +1426,20 @@ namespace PKHeX.Core.AutoMod
                 uint seed = Util.Rand32();
                 if (isWishmaker)
                 {
-                    seed = WC3Seeds.GetShinyWishmakerSeed((Nature)iterPKM.Nature);
+                    seed = WC3Seeds.GetShinyWishmakerSeed(iterPKM.Nature);
                     isWishmaker = false;
                 }
                 if (PokeWalkerSeedFail(seed, Method, pk, iterPKM))
                     continue;
-
+                if (IsMatchFromPKHeX(pk, iterPKM, HPType, shiny, gr, set, enc, seed, Method))
+                    return;
+               
                 PIDGenerator.SetValuesFromSeed(pk, Method, seed);
-                if (pk.AbilityNumber != iterPKM.AbilityNumber && !compromise && pk.Nature != iterPKM.Nature)
+                if (pk.AbilityNumber != iterPKM.AbilityNumber )
                     continue;
-
-                if (pk.PIDAbility != iterPKM.PIDAbility && !compromise)
+                if (!compromise && pk.Nature != iterPKM.Nature)
+                    continue;
+                if (pk.PIDAbility != iterPKM.PIDAbility)
                     continue;
 
                 if (HPType >= 0 && pk.HPType != HPType)
@@ -1448,10 +1469,8 @@ namespace PKHeX.Core.AutoMod
                     if ((la.Info.PIDIV.Type != PIDType.CXD && la.Info.PIDIV.Type != PIDType.CXD_ColoStarter) || !la.Info.PIDIVMatches || !pk.IsValidGenderPID(enc))
                         continue;
                 }
-                if (pk.Species == (int)Species.Unown)
+                if (pk.Species == (ushort)Species.Unown)
                 {
-                    if (enc.Generation == 4 && pk.Form != GetUnownForm(seed, pk.HGSS))
-                        continue;
                     if (pk.Form != iterPKM.Form)
                         continue;
                     if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
@@ -1460,9 +1479,67 @@ namespace PKHeX.Core.AutoMod
                 var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(pk.PID & 0xFFFF) ^ (int)(pk.PID >> 16)) & ~0x7) == 8;
                 if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
                     continue;
+                if (Method == PIDType.Channel && !ChannelJirachi.IsPossible(seed))
+                    continue;
+                if (pk.TID16 == 06930 && !MystryMew.IsValidSeed(seed))
+                    continue;
 
-                break;
+                    break;
             } while (++count < 5_000_000);
+        }
+        private static bool IsMatchFromPKHeX(PKM pk, PKM iterPKM, int HPType, bool shiny, byte gr, IBattleTemplate set, IEncounterable enc, uint seed, PIDType Method)
+        {
+            
+            if (pk.AbilityNumber != iterPKM.AbilityNumber && pk.Nature != iterPKM.Nature)
+                return false;
+
+            if (pk.PIDAbility != iterPKM.PIDAbility)
+                return false;
+
+            if (HPType >= 0 && pk.HPType != HPType)
+                return false;
+
+            if (pk.PID % 25 != (int)iterPKM.Nature) // Util.Rand32 is the way to go
+                return false;
+
+            if (pk.Gender != EntityGender.GetFromPIDAndRatio(pk.PID, gr))
+                return false;
+            if (enc is EncounterSlot4 s4)
+            {
+                var lvl = new SingleLevelRange(enc.LevelMin);
+                if (!LeadFinder.TryGetLeadInfo4(s4, lvl, pk.HGSS, seed, 4, out _))
+                    return false;
+            }
+
+            if (pk.Version == GameVersion.CXD && Method == PIDType.CXD) // verify locks
+            {
+                pk.EncryptionConstant = pk.PID;
+                var ec = pk.PID;
+                bool xorPID = ((pk.TID16 ^ pk.SID16 ^ (int)(ec & 0xFFFF) ^ (int)(ec >> 16)) & ~0x7) == 8;
+                if (enc is EncounterStatic3XD && enc.Species == (int)Species.Eevee && (shiny != pk.IsShiny || xorPID)) // Starter Correlation
+                    return false;
+
+                var la = new LegalityAnalysis(pk);
+                if ((la.Info.PIDIV.Type != PIDType.CXD && la.Info.PIDIV.Type != PIDType.CXD_ColoStarter) || !la.Info.PIDIVMatches || !pk.IsValidGenderPID(enc))
+                    return false;
+            }
+            if (pk.Species == (ushort)Species.Unown)
+            {
+                if (pk.Form != iterPKM.Form)
+                    return false;
+                if (enc.Generation == 3 && pk.Form != EntityPID.GetUnownForm3(pk.PID))
+                    return false;
+            }
+            var pidxor = ((pk.TID16 ^ pk.SID16 ^ (int)(pk.PID & 0xFFFF) ^ (int)(pk.PID >> 16)) & ~0x7) == 8;
+            if (Method == PIDType.Channel && (shiny != pk.IsShiny || pidxor))
+                return false;
+            if (pk.Species == (ushort)Species.Jirachi)
+                return false;
+            if (Method == PIDType.Pokewalker)
+                return false;
+            if (!new LegalityAnalysis(pk).Valid)
+                return false;
+            return true;
         }
         private static byte GetUnownForm(uint seed, bool hgss)
         {

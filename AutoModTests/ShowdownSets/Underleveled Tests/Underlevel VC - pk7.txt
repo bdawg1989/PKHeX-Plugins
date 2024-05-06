@@ -282,6 +282,7 @@ Ability: Sand Force
 Level: 5
 Hardy Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Scratch
 - Growl
@@ -439,6 +440,7 @@ Ability: Steadfast
 Level: 5
 Timid Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Karate Chop
 - Low Kick
@@ -786,6 +788,7 @@ Ability: Reckless
 Level: 15
 Bashful Nature
 Language: English
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Horn Attack
 - Stomp
@@ -883,6 +886,7 @@ Ability: Dry Skin
 Level: 10
 Hardy Nature
 Language: French
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Pound
 - Lovely Kiss
@@ -904,6 +908,7 @@ Ability: Dry Skin
 Level: 20
 Hardy Nature
 Language: French
+~=Generation=1
 =OriginalTrainerName=Trainer
 - Pound
 - Lovely Kiss

@@ -25,6 +25,22 @@ namespace PKHeX.Core.AutoMod
             Extra.ShinyType = pk.ShinyXor == 0 ? Shiny.AlwaysSquare : pk.IsShiny ? Shiny.AlwaysStar : Shiny.Never;
             if (pk is IAlphaReadOnly { IsAlpha: true })
                 Extra.Alpha = true;
+            HasExtraSettings = true;
+            var tr = new SimpleTrainerInfo(pk.Version) { OT = pk.OriginalTrainerName, TID16 = pk.TID16, SID16 = pk.SID16, Gender = pk.OriginalTrainerGender };
+            Trainer = tr;
+            HasTrainerSettings = true;
+            VersionFilters = RegenUtil.GetVersionFilters([$"~=Version={pk.Version}"]);
+            var BatchRibbons = RibbonInfo.GetRibbonInfo(pk);
+            List<string> modified = [];
+            foreach (var rib in BatchRibbons)
+                if (rib.HasRibbon)
+                    modified.Add($".{rib.Name}=true");
+            modified.Add($".MetLocation={pk.MetLocation}");
+            modified.Add($".MetDay={pk.MetDay}");
+            modified.Add($".MetMonth={pk.MetMonth}");
+            modified.Add($".MetYear={pk.MetYear}");
+            if(modified.Count > 0)
+                Batch = new StringInstructionSet(modified.ToArray().AsSpan());
         }
 
         public RegenSet(ICollection<string> lines, byte format, Shiny shiny = Shiny.Never)

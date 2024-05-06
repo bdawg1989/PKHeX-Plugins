@@ -294,7 +294,6 @@ namespace PKHeX.Core.Injection
                 uint arg = 0;
                 if (args.Length != 0)
                     arg = args[i];
-                
 
                 BitConverter.GetBytes(arg).CopyTo(buf, t);
             }

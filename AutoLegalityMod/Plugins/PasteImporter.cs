@@ -31,21 +31,20 @@ namespace AutoModPlugins
             ctrl.Click += ImportPaste;
             ctrl.Name = "Menu_PasteImporter";
             modmenu.DropDownItems.Add(ctrl);
-            ToolStripItem parent = modmenu.OwnerItem;
-            var form = (parent.GetCurrentParent().Parent ?? throw new Exception("Parent not found")).FindForm();
+            ToolStripItem parent = modmenu.OwnerItem?? ctrl;
+            var currparent = parent.GetCurrentParent()??throw new Exception("Parent not found");
+            var form = (currparent.Parent ?? throw new Exception("Parent not found")).FindForm() ?? throw new Exception("Form not found");
             if (form is not null)
             {
                 form.Icon = Resources.icon;
+                form.KeyDown += Downkey;
             }
-            form.KeyDown += downkey;
             ShowdownSetLoader.PKMEditor = PKMEditor;
             ShowdownSetLoader.SaveFileEditor = SaveFileEditor;
-            
         }
 
-        private void downkey(object? sender, KeyEventArgs e)
+        private void Downkey(object? sender, KeyEventArgs e)
         {
-           
             if ((e.KeyCode == Keys.NumPad6 || e.KeyCode == Keys.D6) && e.Control)
             {
                 if (WinFormsUtil.Prompt(MessageBoxButtons.OKCancel, "Generate 6 Random Pokemon?") != DialogResult.OK)
@@ -59,7 +58,6 @@ namespace AutoModPlugins
                 }
                 SaveFileEditor.ReloadSlots();
             }
-                
         }
 
         private void ImportPaste(object? sender, EventArgs e)
@@ -78,7 +76,7 @@ namespace AutoModPlugins
         /// Check whether the showdown text is supposed to be loaded via a text file. If so, set the clipboard to its contents.
         /// </summary>
         /// <returns>output boolean that tells if the data provided is valid or not</returns>
-        private string? GetTextShowdownData()
+        private static string? GetTextShowdownData()
         {
             bool skipClipboardCheck = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
             if (!skipClipboardCheck && Clipboard.ContainsText())
@@ -87,7 +85,6 @@ namespace AutoModPlugins
                 if (ShowdownUtil.IsTextShowdownData(txt))
                     return txt;
             }
-            
             if (!WinFormsUtil.OpenSAVPKMDialog(new[] { "txt" }, out var path))
             {
                 WinFormsUtil.Alert("No data provided.");
@@ -109,7 +106,6 @@ namespace AutoModPlugins
             WinFormsUtil.Alert("Text file with invalid data provided. Please provide a text file with proper Showdown data");
             return null;
         }
-        
         public static int? GetFormSpecificItem(int game, int species, int form)
         {
             if (game == (int)GameVersion.PLA)
@@ -151,8 +147,6 @@ namespace AutoModPlugins
 
             if (form == 0)
                 return false;
-
-     
 
             return false;
         }

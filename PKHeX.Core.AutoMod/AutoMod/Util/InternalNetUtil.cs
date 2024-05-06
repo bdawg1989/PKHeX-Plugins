@@ -10,7 +10,6 @@ namespace PKHeX.Core.AutoMod
 {
     public static class InternalNetUtil
     {
-        
             /// <summary>
             /// Gets the html string from the requested <see cref="address"/>.
             /// </summary>
@@ -94,6 +93,5 @@ namespace PKHeX.Core.AutoMod
                 var b64 = json.Split("\"pokemon\":\"")[1].Split("\"")[0];
                 return System.Convert.FromBase64String(b64);
             }
-        
     }
 }

@@ -99,6 +99,10 @@ namespace PKHeX.Core.AutoMod
             {
                 pk8.SetRibbonIndex(mark);
             }
+            if (pk is PK9 pk9 && pk9.Species != (int)Species.Shedinja && pk9.GetRandomValidMark(set, enc, out var mark9))
+            {
+                pk9.SetRibbonIndex(mark9);
+            }
         }
     }
 }

@@ -463,6 +463,14 @@ namespace PKHeX.Core.Injection
             },
             new()
             {
+                Name = "KSatchelUpgrades",
+                Display = "Items",
+                SCBKey = 0x75CE2CF6,
+                Pointer = "[[[[[main+42BA6B0]+1D8]+1D8]]+428]+18",
+                Type = SCTypeCode.UInt32
+            },
+            new()
+            {
                 Name = "KItemRegular",
                 Display = "Items",
                 SCBKey = 0x9FE2790A,
@@ -488,14 +496,6 @@ namespace PKHeX.Core.Injection
                 Display = "Items",
                 SCBKey = 0xF5D9F4A5,
                 Pointer = "[[main+42BA6B0]+230]+C84"
-            },
-            new()
-            {
-                Name = "KSatchelUpgrades",
-                Display = "Items",
-                SCBKey = 0x75CE2CF6,
-                Pointer = "[[[[[main+42BA6B0]+1D8]+1B8]+70]+270]+38",
-                Type = SCTypeCode.UInt32
             },
             new()
             {
@@ -540,7 +540,7 @@ namespace PKHeX.Core.Injection
         private static string GetB1S1Pointer(LiveHeXVersion lv)
         {
             return lv switch
-            { 
+            {
                 LiveHeXVersion.SV_v300 or LiveHeXVersion.SV_v301 => "[[[[main+47350d8]+1C0]+30]+9D0]",
                 LiveHeXVersion.SV_v202 => "[[[[main+4623A30]+198]+30]+9D0]",
                 LiveHeXVersion.SV_v201 => "[[[[main+4622A30]+198]+30]+9D0]",
@@ -646,7 +646,7 @@ namespace PKHeX.Core.Injection
                         ReflectUtil.SetValue(scb, "Type", sub.Type);
 
                     var ram = psb.com.ReadBytes(psb.GetCachedPointer(sb, offset), scb.Data.Length);
-                    ram.CopyTo(scb.Data, 0);
+                    scb.ChangeData(ram);
                     if (read is null)
                     {
                         read = [ram];

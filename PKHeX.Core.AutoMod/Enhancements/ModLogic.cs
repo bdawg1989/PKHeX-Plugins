@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Runtime;
+using System.Diagnostics;
 namespace PKHeX.Core.AutoMod
 {
     /// <summary>
@@ -26,7 +27,6 @@ namespace PKHeX.Core.AutoMod
         public static bool SetAlpha { get; set; }
         public static bool NativeOnly { get; set; }
         public static GameVersion TransferVersion { get; set; }
-
         /// <summary>
         /// Exports the <see cref="SaveFile.CurrentBox"/> to <see cref="ShowdownSet"/> as a single string.
         /// </summary>
@@ -42,9 +42,10 @@ namespace PKHeX.Core.AutoMod
         /// <returns>Concatenated string of all sets in the specified box.</returns>
         public static string GetRegenSetsFromBox(this SaveFile sav, int box)
         {
-            var data = sav.GetBoxData(box);
+            Span<PKM> data = sav.GetBoxData(box);
             var sep = Environment.NewLine + Environment.NewLine;
-            return data.GetRegenSets(sep);
+            var returnstring = data.GetRegenSets(sep);
+            return returnstring;
         }
 
         /// <summary>
@@ -62,7 +63,6 @@ namespace PKHeX.Core.AutoMod
         public static IEnumerable<PKM> GenerateLivingDex(this SaveFile sav, LivingDexConfig cfg)
         {
             var pklist = new ConcurrentBag<PKM>();
-            List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
@@ -82,7 +82,7 @@ namespace PKHeX.Core.AutoMod
                          continue;
 
                      var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                     var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                     var pk = AddPKM(sav, tr, s, form, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                      if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
                      {
                           pklist.Add(pk);
@@ -99,7 +99,6 @@ namespace PKHeX.Core.AutoMod
             var resetevent = new ManualResetEvent(false);
             var DestinationSave = SaveUtil.GetBlankSAV(cfg.TransferVersion, "ALM");
             ConcurrentBag<PKM> pklist = [];
-            List<List<PKM>> Initialpklist = [];
             var tr = APILegality.UseTrainerData ? TrainerSettings.GetSavedTrainerData(sav.Version, sav.Generation, fallback: sav, lang: (LanguageID)sav.Language) : sav;
             var pt = sav.Personal;
             var species = Enumerable.Range(1, sav.MaxSpeciesID).Select(x => (ushort)x);
@@ -120,7 +119,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
 
                     var form = cfg.IncludeForms ? f : GetBaseForm(s, f, sav);
-                    var pk = AddPKM(sav, tr, s, f, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
+                    var pk = AddPKM(sav, tr, s, form, cfg.SetShiny, cfg.SetAlpha, cfg.NativeOnly);
                     if (pk is not null && !pklist.Any(x => x.Species == pk.Species && x.Form == pk.Form))
                     {
                         pklist.Add(pk);
@@ -235,7 +234,7 @@ namespace PKHeX.Core.AutoMod
                 return null;
 
             var setText = new ShowdownSet(blank).Text.Split('\r')[0];
-            if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form)&&(tr.Generation!=6 && blank.Species != (ushort)Species.Vivillon && blank.Form !=18))
+            if (shiny && !SimpleEdits.IsShinyLockedSpeciesForm(blank.Species, blank.Form)||(tr.Generation!=6 && blank.Species != (ushort)Species.Vivillon && blank.Form !=18))
                 setText += Environment.NewLine + "Shiny: Yes";
 
             if (template is IAlphaReadOnly && alpha && tr.Version == GameVersion.PLA)
@@ -249,8 +248,6 @@ namespace PKHeX.Core.AutoMod
             var almres = tr.TryAPIConvert(set, t, nativeOnly);
             var pk = almres.Created;
             var success = almres.Status;
-            if (pk.Species == (ushort)Species.Unown && pk.Form != blank.Form)
-                pk.Form = blank.Form;
 
             if (success == LegalizationResult.Regenerated)
                 return pk;
@@ -279,8 +276,7 @@ namespace PKHeX.Core.AutoMod
             var species = pk.Species;
             switch ((Species)species)
             {
-                case Species.Unown when generation == 2 && form >= 26:
-                    return true;
+                
                 case Species.Floette when form == 5:
                     return true;
                 case Species.Shaymin
@@ -457,7 +453,7 @@ namespace PKHeX.Core.AutoMod
                         continue;
                     }
                 }
-                catch (Exception) { }
+                catch (Exception) { Debug.Write("Smogon Issues"); }
 
                 var showstring = new ShowdownSet(rough).Text.Split('\r')[0];
                 showstring += "\nLevel: 100\n";
@@ -476,7 +472,7 @@ namespace PKHeX.Core.AutoMod
                 selectedSpecies.Add(rough.Species);
             }
 
-            return RandomTeam.ToArray();
+            return [.. RandomTeam];
         }
     }
 }
