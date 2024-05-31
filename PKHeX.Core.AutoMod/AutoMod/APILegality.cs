@@ -115,7 +115,7 @@ namespace PKHeX.Core.AutoMod
                 raw = raw.SanityCheckLocation(enc);
                 if (raw.IsEgg) // PGF events are sometimes eggs. Force hatch them before proceeding
                     raw.HandleEggEncounters(enc, tr);
-
+                
                 raw.PreSetPIDIV(enc, set, criteria);
 
                 // Transfer any VC1 via VC2, as there may be GSC exclusive moves requested.
@@ -127,7 +127,7 @@ namespace PKHeX.Core.AutoMod
                 if (pk == null)
                     continue;
 
-                if (EntityConverter.IsIncompatibleGB(pk, template.Japanese, pk.Japanese))
+                if (!EntityConverter.IsCompatibleGB(pk, template.Japanese, pk.Japanese))
                     continue;
 
                 pk = pk.Clone(); // Handle Nickname-Trash issues (weedle word filter)
@@ -726,23 +726,19 @@ namespace PKHeX.Core.AutoMod
             if (!SetBattleVersion)
                 return;
 
-            if (pk.IsNative && !pk.GO)
-                return;
-
-            if (pk is not IBattleVersion bvPk)
-                return;
-
-            var oldBattleVersion = bvPk.BattleVersion;
-            var relearn = pk.RelearnMoves;
-
-            pk.ClearRelearnMoves();
-            bvPk.BattleVersion = trainer.Version;
-
-            var la = new LegalityAnalysis(pk);
-            if (!la.Valid)
+            if (pk is PK8 { SWSH: false } pk8)
             {
-                bvPk.BattleVersion = oldBattleVersion;
-                pk.SetRelearnMoves(relearn);
+                Span<ushort> relearn = stackalloc ushort[4];
+                pk8.GetRelearnMoves(relearn);
+
+                pk8.ClearRelearnMoves();
+                pk8.BattleVersion = trainer.Version == GameVersion.SWSH ? GameVersion.SW : trainer.Version;
+
+                if (!new LegalityAnalysis(pk8).Valid)
+                {
+                    pk8.BattleVersion = GameVersion.Any;
+                    pk8.SetRelearnMoves(relearn);
+                }
             }
         }
 

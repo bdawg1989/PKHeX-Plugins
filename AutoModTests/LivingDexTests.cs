@@ -81,7 +81,6 @@ namespace AutoModTests
             APILegality.Timeout = 99999;
             Legalizer.EnableEasterEggs = false;
             APILegality.SetAllLegalRibbons = false;
-            APILegality.EnableDevMode = true;
 
             var res = game.SingleSaveTest(cfg);
             res.Success.Should().BeTrue($"GameVersion: {game}\n{cfg}\nExpected: {res.Expected}\nGenerated: {res.Generated}");

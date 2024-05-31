@@ -218,11 +218,10 @@ namespace AutoModPlugins
 
                 if (lv is not LiveHeXVersion.Unknown)
                 {
-                    // Load current box
-                    Remote.ReadBox(SAV.CurrentBox);
-
                     // Set Trainer Data
                     SetTrainerData(SAV.SAV);
+                    // Load current box
+                    Remote.ReadBox(SAV.CurrentBox);
                 }
             }
             // Console might be disconnected...

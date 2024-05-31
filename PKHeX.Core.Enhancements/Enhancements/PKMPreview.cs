@@ -19,7 +19,7 @@ namespace PKHeX.Core.Enhancements
                 var country = "N/A";
                 var region = "N/A";
                 var DSRegion = "N/A";
-                if (p.pk is IGeoTrack gt)
+                if (p.Entity is IGeoTrack gt)
                 {
                     country = gt.Country.ToString();
                     region = gt.Region.ToString();
