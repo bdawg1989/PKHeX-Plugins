@@ -55,7 +55,7 @@ namespace PKHeX.Core.AutoMod
                 regen = RegenSet.Default;
             }
 
-            if (template.Version == 0)
+            if (template.Version == GameVersion.Any)
                 template.Version = dest.Version;
 
             template.ApplySetDetails(set);
@@ -83,7 +83,7 @@ namespace PKHeX.Core.AutoMod
             criteria.ForceMinLevelRange = true;
             if (regen.EncounterFilters.Any())
                 encounters = encounters.Where(enc => BatchEditing.IsFilterMatch(regen.EncounterFilters, enc));
-
+            encounters = encounters.OrderByDescending(z => z.Version == destVer);
             PKM? last = null;
             foreach (var enc in encounters)
             {
@@ -182,6 +182,11 @@ namespace PKHeX.Core.AutoMod
 
         private static PKM GetPokemonFromEncounter(this IEncounterable enc, ITrainerInfo tr, EncounterCriteria criteria, IBattleTemplate set)
         {
+            if(enc is WC3 wc)
+            {
+                if (wc.Species == (ushort)Species.Jirachi && tr.Language == (byte)LanguageID.Japanese)
+                    tr = tr.MutateLanguage(LanguageID.English,tr.Version);
+            }
             var basepkm = enc.ConvertToPKM(tr, criteria);
 
             // If the encounter is a Wurmple, we need to make sure the evolution is correct.
@@ -277,7 +282,18 @@ namespace PKHeX.Core.AutoMod
 
             if (template.AbilityNumber == 4 && destVer.GetGeneration() < 8)
                 gamelist = gamelist.Where(z => z.GetGeneration() is not 3 and not 4).ToArray();
-
+            if (gamelist.Contains(GameVersion.HGSS))
+            {
+                gamelist = gamelist.Where(z => z != GameVersion.HGSS).ToArray();
+                gamelist = gamelist.Append(GameVersion.HG).ToArray();
+                gamelist = gamelist.Append(GameVersion.SS).ToArray();
+            }
+            if (gamelist.Contains(GameVersion.FRLG))
+            {
+                gamelist = gamelist.Where(z => z != GameVersion.FRLG).ToArray();
+                gamelist = gamelist.Append(GameVersion.FR).ToArray();
+                gamelist = gamelist.Append(GameVersion.LG).ToArray();
+            }
             return gamelist;
         }
 

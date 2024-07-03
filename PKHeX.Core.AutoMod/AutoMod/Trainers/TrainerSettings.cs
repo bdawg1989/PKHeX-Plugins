@@ -11,8 +11,8 @@ namespace PKHeX.Core.AutoMod
     {
         private static readonly TrainerDatabase Database = new();
         public static readonly string TrainerPath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath)!, "trainers");
-        private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW);
-        private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM);
+        private static readonly SimpleTrainerInfo DefaultFallback8 = new(GameVersion.SW) { Generation = 8 };
+        private static readonly SimpleTrainerInfo DefaultFallback7 = new(GameVersion.UM) { Generation = 7 };
         private static readonly GameVersion[] FringeVersions =
         [
             GameVersion.GG,
@@ -134,7 +134,7 @@ namespace PKHeX.Core.AutoMod
         {
             int origin = pk.Generation;
             byte format = pk.Format;
-            return format != origin ? GetSavedTrainerData(format, template_save.Version, fallback: template_save, lang: lang) : GetSavedTrainerData((byte)pk.Version, (GameVersion)origin, template_save, lang);
+            return format != origin ? GetSavedTrainerData(format, template_save.Version, fallback: template_save, lang: lang) : GetSavedTrainerData((byte)origin, pk.Version, template_save, lang);
         }
 
         /// <summary>
